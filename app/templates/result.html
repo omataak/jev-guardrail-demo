@@ -1,0 +1,21 @@
+{% if error %}<div class="error" role="alert"><strong>判定できませんでした</strong>
+    <p>{{ error }}</p>
+</div>{% else %}
+<div class="verdict {{ 'blocked' if blocked else 'passed' }}"><strong>{{ 'Blocked' if blocked else 'Passed' }}</strong>
+</div>
+<div class="metrics">
+    <div><span>API Response Time</span><strong>{{ '%.0f'|format(elapsed) }}<small> ms</small></strong></div>
+    <div><span>Cost / Call</span><strong>{% if cost is not none %}${{ '%.8f'|format(cost) }}{% else %}Unavailable{% endif
+            %}</strong><small>Input {{ tokens if tokens is not none else 'Unknown' }} tokens</small></div>
+</div>
+<div class="probabilities">{% for row in rows %}<div class="probability-card{{ ' is-triggered' if row.triggered else '' }}">
+        <div class="probability-label">{{ row.label }}</div>
+        {% if row.type == 'noul' %}<div class="probability-value">{{ '%.1f'|format(row.probability * 100) }}<span>%</span></div><progress aria-label="{{ row.label }}" max="1" value="{{ row.probability }}"></progress>
+        {% elif row.type == 'choice' %}<div class="choice-value">{{ row.choice }}</div>{% for option, probability in row.probabilities.items() %}<div class="distribution"><span>{{ option }}</span><strong>{{ '%.1f'|format(probability * 100) }}%</strong></div>{% endfor %}
+        {% else %}<div class="probability-value">{{ '%.2f'|format(row.score) }}<span>/ {{ row.maximum }}</span></div><progress aria-label="{{ row.label }}" max="{{ row.maximum }}" value="{{ row.score }}"></progress>{% endif %}
+    </div>{% endfor %}</div>
+<details class="configuration">
+    <summary>Configuration</summary>
+    <label>Request JSON<textarea class="raw-json" readonly aria-label="Request JSON">{{ request_json }}</textarea></label>
+    <label>Response JSON<textarea class="raw-json" readonly aria-label="Response JSON">{{ response_json }}</textarea></label>
+</details>{% endif %}

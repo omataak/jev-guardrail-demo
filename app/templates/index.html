@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jev Guardrail Demo</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.js" defer></script>
+    <script src="/static/app.js" defer></script>
+</head>
+
+<body>
+    <main>
+        <header>
+            <div class="eyebrow">AI GUARDRAILS</div>
+            <h1>Guardrail Demo<span class="live">Jev</span></h1>
+        </header>
+        {% if not configured %}<div class="notice">APIキー未設定：.env に TYPESAFE_API_KEY を設定して再起動してください。</div>{% endif %}
+        <form id="guard-form" action="/evaluate" method="post" hx-post="/evaluate" hx-target="#result"
+            hx-disabled-elt="#run" hx-indicator="#loading">
+            <div class="workspace">
+                <section class="panel">
+                    <div class="section-title">
+                        <h2><span>01</span> Jev 設定</h2><button type="button" id="reset"
+                            class="secondary">初期値に戻す</button>
+                    </div>
+                    <div id="rule-builder"></div><button type="button" id="add-rule" class="secondary">＋ ルール追加</button>
+                    <details class="json-preview">
+                        <summary>RULES</summary><textarea id="rules" name="rules" readonly>{{ rules }}</textarea>
+                    </details>
+                </section>
+                <div class="right">
+                    <section class="panel">
+                        <h2><span>02</span> プロンプト</h2>
+                        <div class="samples" role="group" aria-label="サンプル文章">{% for sample in samples %}<button
+                                type="button" class="sample-button" data-prompt="{{ sample.text }}"
+                                aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ sample.label }}</button>{%
+                            endfor %}</div><label for="prompt">判定する文章</label><textarea id="prompt" name="prompt"
+                            maxlength="20000" required>{{ samples[0].text }}</textarea>
+                        <div class="run-row"><button id="run" type="submit">Jevで判定する →</button></div>
+                        <div id="loading" class="htmx-indicator" role="status">Jevが判定しています…</div>
+                    </section>
+                    <section class="panel">
+                        <h2><span>03</span> 判定結果</h2>
+                        <div id="result" aria-live="polite">
+                            <div class="empty">判定結果がここに表示されます</div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </form>
+        <footer>Jev 1.13 · Input cost: $0.042 / 1M Tokens · Output cost: Free</footer>
+    </main>
+</body>
+
+</html>
